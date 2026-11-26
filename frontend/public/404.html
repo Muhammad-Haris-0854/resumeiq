@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ResumeIQ</title>
+    <script>
+      // GitHub Pages serves this file for any path it cannot find. The app is a single-page
+      // app under /<repo>/, so remember the requested route and reload the app shell; the
+      // router restores it on boot (see src/lib/spa-redirect.ts).
+      (function () {
+        var segments = window.location.pathname.split("/").filter(Boolean);
+        var base = segments.length === 1 || segments.length > 1 ? "/" + segments[0] + "/" : "/";
+        if (segments.length === 0 || segments[0].indexOf(".") !== -1) {
+          base = "/";
+        }
+        var rest = window.location.pathname.slice(base.length);
+        try {
+          window.sessionStorage.setItem(
+            "resumeiq:redirect",
+            rest + window.location.search + window.location.hash,
+          );
+        } catch (error) {
+          /* private mode: fall through to the app root */
+        }
+        window.location.replace(base);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
