@@ -4,7 +4,7 @@
 
 ## Context
 Resume parsing, OCR, NLP and PDF rendering have mature Python libraries (PyMuPDF, python-docx,
-spaCy, pytesseract, WeasyPrint). The scoring engine must be deterministic and unit-testable.
+spaCy, pytesseract, ReportLab). The scoring engine must be deterministic and unit-testable.
 
 ## Decision
 A separate FastAPI service owns extraction, analysis, scoring and export. The SPA never parses

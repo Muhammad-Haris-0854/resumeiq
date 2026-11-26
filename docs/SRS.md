@@ -175,7 +175,9 @@ Requirement identifiers are stable and referenced by tests.
 - **A-3** Payments are behind a provider abstraction. Because gateway availability in the
   target market is not confirmed, v1 ships a fully working `mock` provider and a Stripe
   adapter skeleton, both driven by the same `PaymentProvider` interface. See ADR-004.
-- **A-4** PDF export uses WeasyPrint-compatible HTML rendering with a ReportLab fallback.
+- **A-4** PDF export renders the same content model server-side with ReportLab (single-column A4,
+  selectable text). The HTML renderer in `services/builder.py` backs the in-app preview only, so the
+  deployment needs no headless browser or system font stack.
 
 ## 7. Acceptance criteria for v1
 
