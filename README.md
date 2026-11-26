@@ -11,6 +11,15 @@ evidence-backed report plus a rebuilt, ATS-safe PDF.
 
 ---
 
+## Live preview
+
+**https://muhammad-haris-0854.github.io/resumeiq/** (GitHub Pages, rebuilt on every push to `main`)
+
+The preview is the real React app with Supabase auth wired from repository secrets, but it has no
+FastAPI service behind it, so analysis calls return `API_NOT_CONFIGURED` and the UI shows a banner
+saying so. Add the `VITE_API_BASE_URL` repository secret pointing at a deployed backend and the
+same build becomes fully functional.
+
 ## What actually works
 
 | Area | State |
