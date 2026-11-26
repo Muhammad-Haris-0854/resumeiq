@@ -75,6 +75,10 @@ class AnalysisRepository(ABC):
     def get(self, user_id: str, analysis_id: str) -> Row | None: ...
 
     @abstractmethod
+    def get_by_id(self, analysis_id: str) -> Row | None:
+        """Unscoped read used by the worker, which has no user session."""
+
+    @abstractmethod
     def list(self, user_id: str, *, limit: int, offset: int) -> tuple[list[Row], int]: ...
 
     @abstractmethod

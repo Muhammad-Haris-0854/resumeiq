@@ -80,9 +80,7 @@ def current_user(
 ) -> CurrentUser:
     profile = repos.users.get_profile(principal.user_id)
     if profile is None:
-        # Auth exists but the profile row has not been created yet (trigger lag or manual user).
-        profile = repos.users.update_profile(principal.user_id, {}) if False else None
-    if profile is None:
+        # Auth exists but the profile row has not been created yet (trigger lag or a manual user).
         raise Unauthenticated("Your profile is still being created. Try again in a moment.")
     role_value = repos.users.get_role(principal.user_id)
     role = Role.ADMINISTRATOR if role_value == Role.ADMINISTRATOR.value else Role.USER

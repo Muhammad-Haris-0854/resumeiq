@@ -12,6 +12,7 @@ from app.api.deps import (
     get_payments,
     get_repositories,
 )
+from app.core.config import get_settings
 from app.core.errors import AppError, NotFound, UpstreamFailure
 from app.core.logging import get_logger
 from app.integrations.payments import PaymentProvider, WebhookVerificationError
@@ -74,6 +75,7 @@ def create_checkout(
     repos: Repositories = Depends(get_repositories),
     provider: PaymentProvider = Depends(get_payments),
 ) -> CheckoutOut:
+    frontend_url = get_settings().frontend_url
     session = start_checkout(
         repos,
         provider,
@@ -81,8 +83,8 @@ def create_checkout(
         email=user.email,
         plan_code=payload.plan_code,
         interval=payload.interval,
-        success_url=f"{__import__('app.core.config', fromlist=['get_settings']).get_settings().frontend_url}/billing/success",
-        cancel_url=f"{__import__('app.core.config', fromlist=['get_settings']).get_settings().frontend_url}/pricing",
+        success_url=f"{frontend_url}/billing/success",
+        cancel_url=f"{frontend_url}/pricing",
     )
     repos.admin.audit(user.id, "billing.checkout_started", "plan", payload.plan_code, {"interval": payload.interval})
     return CheckoutOut(checkout_url=session.url, session_id=session.id)
@@ -94,8 +96,6 @@ def create_portal(
     repos: Repositories = Depends(get_repositories),
     provider: PaymentProvider = Depends(get_payments),
 ) -> dict[str, str]:
-    from app.core.config import get_settings
-
     subscription = repos.billing.get_subscription(user.id) or {}
     url = provider.create_portal(
         customer_id=subscription.get("provider_customer_id"),

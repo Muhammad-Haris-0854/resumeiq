@@ -245,13 +245,7 @@ def run_analysis(
 ) -> None:
     """Worker entry point: load, analyse, persist. Idempotent per analysis id."""
     started = time.perf_counter()
-    analysis = None
-    try:
-        analysis = repos.analyses.get_by_id(analysis_id) if hasattr(repos.analyses, "get_by_id") else None
-    except Exception:  # pragma: no cover - repository without the helper
-        analysis = None
-    if analysis is None:
-        analysis = _load_analysis(repos, analysis_id)
+    analysis = repos.analyses.get_by_id(analysis_id)
     if analysis is None:
         logger.warning("analysis_missing", extra={"extra_fields": {"analysis_id": analysis_id}})
         return
@@ -325,13 +319,3 @@ def run_analysis(
             },
         )
         raise
-
-
-def _load_analysis(repos: Repositories, analysis_id: str) -> dict[str, Any] | None:
-    """Loads an analysis without a user scope (worker context)."""
-    client = getattr(repos.analyses, "_client", None)
-    if client is None:
-        return None
-    response = client.table("resume_analyses").select("*").eq("id", analysis_id).limit(1).execute()
-    rows = response.data or []
-    return rows[0] if rows else None

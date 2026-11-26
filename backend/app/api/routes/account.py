@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import time
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
@@ -98,7 +100,7 @@ def export_account(
         "analyses": analyses,
     }
     payload = json.dumps(bundle, default=str, indent=2).encode()
-    path = f"{user.id}/export-{int(__import__('time').time())}.json"
+    path = f"{user.id}/export-{int(time.time())}.json"
     repos.storage.upload("generated", path, payload, "application/json")
     url = repos.storage.signed_url("generated", path, 300)
     return {"url": url, "expires_in": "300"}
@@ -133,7 +135,7 @@ def read_notification(
         raise NotFound("Notification not found")
     rows = (
         client.table("notifications")
-        .update({"read_at": __import__("datetime").datetime.utcnow().isoformat()})
+        .update({"read_at": datetime.now(UTC).isoformat()})
         .eq("id", notification_id)
         .eq("user_id", user.id)
         .execute()

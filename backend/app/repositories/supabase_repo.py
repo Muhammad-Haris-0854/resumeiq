@@ -233,6 +233,11 @@ class SupabaseAnalysisRepository(_Base, AnalysisRepository):
             .execute()
         )
 
+    def get_by_id(self, analysis_id: str) -> Row | None:
+        return self._one(
+            self._table("resume_analyses").select("*").eq("id", analysis_id).limit(1).execute()
+        )
+
     def list(self, user_id: str, *, limit: int, offset: int) -> tuple[list[Row], int]:
         response = (
             self._table("resume_analyses")
