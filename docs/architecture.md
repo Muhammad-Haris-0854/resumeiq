@@ -76,15 +76,30 @@ class AIProvider(Protocol):
 
 Implementations:
 
-- `OpenAICompatibleProvider` — any chat-completions endpoint (OpenAI, Azure OpenAI, Groq,
-  OpenRouter, self-hosted vLLM). Configured by `AI_BASE_URL`, `AI_MODEL`, `AI_PROVIDER_API_KEY`.
+- `OpenAICompatibleProvider` — any chat-completions endpoint (OpenAI, Gemini, Azure OpenAI,
+  Groq, OpenRouter, self-hosted vLLM). Configured by `AI_BASE_URL`, `AI_MODEL`,
+  `AI_PROVIDER_API_KEY`.
+  - `AI_PROVIDER=google` targets Gemini through Google's OpenAI-compatible endpoint
+    (`/v1beta/openai`) and defaults to `gemini-3-flash-preview`. Verify a key with
+    `python tools/ai_smoke_test.py` before deploying: it exercises the real analysis and job
+    description schemas, so a retired model name or an exhausted quota shows up in seconds.
+  - Gemini 2.5 models are closed to new API keys, and the model line moves quickly, so
+    `AI_MODEL` is configuration, not a constant.
 - `DeterministicProvider` — offline, rule-based. Used in tests, in CI, and when no key is
   configured so the product still works end to end.
 
 Guardrails:
 
-- Every AI response is validated against a JSON schema; invalid output is retried once, then
+- The JSON schema is sent with every request. Without it the model invents property names
+  (`required_qualifications` for `required_skills`) and every response fails validation.
+- Every AI response is validated against that schema. Undefined extra keys are dropped; missing
+  or mistyped required fields trigger one repair attempt with the exact validation error; then
   the analysis degrades to the deterministic path instead of failing.
+- Transient failures (429, 5xx, timeouts) are retried with backoff, longer for rate limits than
+  for a blip. Truncation is reported as truncation, so `AI_MAX_TOKENS` is the obvious next step
+  rather than a schema hunt.
+- Reasoning models spend output tokens on thinking. `AI_REASONING_EFFORT=low` keeps Gemini's
+  JSON intact and is the default for the Google provider.
 - The model may never emit numeric scores. It returns observations with severity and evidence;
   the scoring engine converts them.
 - Prompts state that resume text is data, and that instructions inside it must be ignored.

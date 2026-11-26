@@ -79,6 +79,24 @@ Fill in `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server only), `VITE_SUPABAS
 `VITE_SUPABASE_PUBLISHABLE_KEY`. Leave `AI_PROVIDER_API_KEY` empty to run the deterministic
 provider.
 
+The default AI provider is Google Gemini (`AI_PROVIDER=google`, `AI_MODEL=gemini-3-flash-preview`).
+Check a key before deploying, without needing Supabase or Redis:
+
+```bash
+cd backend
+AI_PROVIDER=google AI_PROVIDER_API_KEY=... python tools/ai_smoke_test.py
+```
+
+It runs the real resume-analysis and job-description schemas and prints the issues the model
+found, so a retired model name, a bad key or an exhausted quota is obvious immediately.
+
+### 2b. Database (one paste)
+
+`schema.sql` and the seed data are pre-concatenated into `supabase/setup_all.sql`. Paste that
+single file into the Supabase SQL editor and run it on a fresh project; it creates the schema,
+RLS policies, storage buckets and reference data. Regenerate it after editing a migration with
+`tools/build_setup_sql.sh`.
+
 ### 3. Run
 
 ```bash

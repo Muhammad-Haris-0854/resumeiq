@@ -33,12 +33,14 @@ class Settings(BaseSettings):
     database_url: str = ""
 
     # --- AI -----------------------------------------------------------------
-    ai_provider: Literal["auto", "openai_compatible", "deterministic"] = "auto"
-    ai_base_url: str = "https://api.openai.com/v1"
-    ai_model: str = "gpt-4o-mini"
+    ai_provider: Literal["auto", "openai_compatible", "google", "deterministic"] = "auto"
+    ai_base_url: str = ""
+    ai_model: str = ""
     ai_provider_api_key: str = ""
-    ai_timeout_seconds: float = 45.0
-    ai_max_tokens: int = 1800
+    ai_timeout_seconds: float = 60.0
+    ai_max_tokens: int = 3000
+    ai_max_retries: int = 3
+    ai_reasoning_effort: Literal["", "low", "medium", "high"] = ""
 
     # --- Payments -----------------------------------------------------------
     payment_provider: Literal["mock", "stripe"] = "mock"
@@ -86,7 +88,8 @@ class Settings(BaseSettings):
 
     @property
     def ai_enabled(self) -> bool:
-        return self.ai_provider == "deterministic" or bool(self.ai_provider_api_key)
+        """True when a model provider is configured rather than the offline fallback."""
+        return self.ai_provider != "deterministic" and bool(self.ai_provider_api_key)
 
 
 @lru_cache

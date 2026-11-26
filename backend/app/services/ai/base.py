@@ -10,7 +10,15 @@ from typing import Any, Protocol, runtime_checkable
 
 
 class AIProviderError(Exception):
-    """Raised when a provider is unreachable or returns unusable output."""
+    """Raised when a provider is unreachable, rate limited or returns unusable output."""
+
+
+class AIOutputError(AIProviderError):
+    """The provider answered but its payload is unusable (truncated, empty or not JSON).
+
+    Kept distinct from transport failures so one repair attempt is made for a bad answer,
+    while a 5xx or rate limit is retried as a transport problem instead.
+    """
 
 
 @runtime_checkable
