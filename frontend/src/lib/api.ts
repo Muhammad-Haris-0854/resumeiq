@@ -1,5 +1,5 @@
 import { getAccessToken, supabase, supabaseReady } from "@/lib/supabase";
-import { env } from "@/lib/env";
+import { apiConfigured, env } from "@/lib/env";
 
 /** Error shape returned by the API, normalised for the UI. */
 export class ApiError extends Error {
@@ -52,6 +52,13 @@ async function ensureFreshToken(): Promise<string | null> {
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, formData, auth = true, signal } = options;
+
+  if (!apiConfigured) {
+    throw new ApiError(
+      "This build is not connected to the ResumeIQ API, so analysis features are unavailable.",
+      { code: "API_NOT_CONFIGURED" },
+    );
+  }
   const headers: Record<string, string> = { Accept: "application/json" };
 
   if (auth) {
