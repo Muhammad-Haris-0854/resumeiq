@@ -19,8 +19,8 @@ export function ConfigBanner() {
       <div className="pointer-events-auto flex max-w-xl items-start gap-3 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-lg">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          <span className="font-semibold">Preview build:</span> {reasons.join(", ")}. Sign-in works;
-          resume analysis needs the FastAPI service (see the README).
+          <span className="font-semibold">Preview build:</span> {reasons.join(", ")}. Sign-in works, but
+          profile and analysis data need the FastAPI service (see the README).
         </p>
       </div>
     </div>
