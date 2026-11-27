@@ -1,0 +1,42 @@
+# Render Blueprint: one Docker web service, no Redis needed.
+#
+# Import this repo at https://dashboard.render.com/blueprints and Render reads this file,
+# builds backend/Dockerfile, and asks for the four secret values below.
+#
+# CELERY_EAGER=true runs extraction, analysis and export inline instead of queueing them, so the
+# service works without a worker or a broker. Swap it off once you add Redis and a worker.
+services:
+  - type: web
+    name: resumeiq-api
+    runtime: docker
+    plan: free
+    region: singapore
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CELERY_EAGER
+        value: "true"
+      - key: AI_PROVIDER
+        value: google
+      - key: AI_MODEL
+        value: gemini-3-flash-preview
+      - key: AI_REASONING_EFFORT
+        value: low
+      - key: AI_MAX_TOKENS
+        value: "3000"
+      - key: CORS_ORIGINS
+        value: https://muhammad-haris-0854.github.io
+      - key: FRONTEND_URL
+        value: https://muhammad-haris-0854.github.io/resumeiq/
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: AI_PROVIDER_API_KEY
+        sync: false
