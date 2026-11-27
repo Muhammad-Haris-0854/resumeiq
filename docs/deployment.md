@@ -8,6 +8,24 @@
 | API | Render / Fly.io / Railway / ECS | `backend/Dockerfile`, 2+ replicas, stateless |
 | Worker | Same image, different command | `celery -A app.workers.celery_app.celery_app worker -Q default,ai,ai_priority` |
 | Redis | Managed (Upstash, Elasticache, Render) | Broker + result backend |
+
+### Cheapest working deployment (no Redis, one container)
+
+For a demo or a single-tenant pilot you do not need Redis or a worker. Set
+`CELERY_EAGER=true`: the API then runs extraction, analysis and export inline instead of
+queueing them. Everything else stays the same.
+
+1. Create a Render Web Service from this repo, runtime Docker, root directory `backend`.
+2. Environment: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`,
+   `AI_PROVIDER=google`, `AI_PROVIDER_API_KEY`, `CELERY_EAGER=true`,
+   `ENVIRONMENT=production`, `CORS_ORIGINS=https://muhammad-haris-0854.github.io`.
+3. Copy the service URL into the frontend's `VITE_API_BASE_URL` (repo secret for the Pages
+   build) and redeploy the frontend.
+
+Trade-off: a request now holds the connection for the whole analysis (roughly 5 to 15 seconds
+with Gemini), so use a paid instance type or keep the prompt budget small. For real traffic,
+switch `CELERY_EAGER` off and add the worker and Redis.
+
 | Database / Auth / Storage | Supabase | Managed Postgres 15, RLS, private buckets |
 
 ## 2. Order of operations
