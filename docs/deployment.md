@@ -9,22 +9,40 @@
 | Worker | Same image, different command | `celery -A app.workers.celery_app.celery_app worker -Q default,ai,ai_priority` |
 | Redis | Managed (Upstash, Elasticache, Render) | Broker + result backend |
 
-### Cheapest working deployment (no Redis, one container)
+### The deployment that is live today (serverless, no Redis)
 
-For a demo or a single-tenant pilot you do not need Redis or a worker. Set
-`CELERY_EAGER=true`: the API then runs extraction, analysis and export inline instead of
-queueing them. Everything else stays the same.
+ResumeIQ runs without Redis, a worker or a paid plan. `CELERY_EAGER=true` makes the API run
+extraction, analysis and export inline instead of queueing them, so one stateless function is
+enough.
 
-1. Create a Render Web Service from this repo, runtime Docker, root directory `backend`.
-2. Environment: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`,
-   `AI_PROVIDER=google`, `AI_PROVIDER_API_KEY`, `CELERY_EAGER=true`,
-   `ENVIRONMENT=production`, `CORS_ORIGINS=https://muhammad-haris-0854.github.io`.
-3. Copy the service URL into the frontend's `VITE_API_BASE_URL` (repo secret for the Pages
-   build) and redeploy the frontend.
+| Piece | Where it runs | URL |
+|---|---|---|
+| Frontend | GitHub Pages, built by `.github/workflows/deploy-pages.yml` | https://muhammad-haris-0854.github.io/resumeiq/ |
+| API | Vercel Python function, project `resumeiq-api`, root directory `backend` | https://resumeiq-api-wheat.vercel.app |
 
-Trade-off: a request now holds the connection for the whole analysis (roughly 5 to 15 seconds
-with Gemini), so use a paid instance type or keep the prompt budget small. For real traffic,
-switch `CELERY_EAGER` off and add the worker and Redis.
+Deploying the API again:
+
+```bash
+cd backend
+npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+```
+
+Environment the function needs: `ENVIRONMENT=production`, `CELERY_EAGER=true`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `AI_PROVIDER=google`, `AI_MODEL`,
+`AI_PROVIDER_API_KEY`, `AI_REASONING_EFFORT=low`, `CORS_ORIGINS` (the Pages origin),
+`FRONTEND_URL`, `OCR_ENABLED=false` (the Vercel image has no Tesseract binary).
+
+Two gotchas that cost a failed deploy each:
+
+- `backend/.vercelignore` excludes `pyproject.toml`. Vercel prefers it over `requirements.txt`,
+  and our `pyproject.toml` only holds lint and test configuration, so leaving it in installs
+  zero dependencies and every request returns `FUNCTION_INVOCATION_FAILED`.
+- `backend/api/index.py` is the entrypoint; `vercel.json` rewrites all paths to it with a 60
+  second budget. A cold start plus a Gemini analysis fits, but keep an eye on it if prompts grow.
+
+Render is the alternative for a long-running container, but it asks for a card on file even on
+the free plan: create a Web Service from `backend/Dockerfile`, set the same environment, and
+leave `CELERY_EAGER` on unless you add Redis and a worker.
 
 | Database / Auth / Storage | Supabase | Managed Postgres 15, RLS, private buckets |
 

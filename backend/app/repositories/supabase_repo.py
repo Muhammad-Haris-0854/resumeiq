@@ -70,6 +70,16 @@ class SupabaseUserRepository(_Base, UserRepository):
     def get_profile(self, user_id: str) -> Row | None:
         return self._one(self._table("profiles").select("*").eq("id", user_id).limit(1).execute())
 
+    def ensure_profile(self, user_id: str, email: str | None) -> Row:
+        self._table("profiles").upsert(
+            {"id": user_id, "email": email, "plan": "free", "created_at": _now(), "updated_at": _now()},
+            on_conflict="id",
+        ).execute()
+        row = self.get_profile(user_id)
+        if not row:
+            raise NotFound("Profile could not be created")
+        return row
+
     def update_profile(self, user_id: str, patch: Row) -> Row:
         row = self._one(
             self._table("profiles")

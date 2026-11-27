@@ -80,8 +80,9 @@ def current_user(
 ) -> CurrentUser:
     profile = repos.users.get_profile(principal.user_id)
     if profile is None:
-        # Auth exists but the profile row has not been created yet (trigger lag or a manual user).
-        raise Unauthenticated("Your profile is still being created. Try again in a moment.")
+        # Accounts created before the schema existed, or before the signup trigger ran, have no
+        # profile row. Create it on first use instead of locking the user out of the product.
+        profile = repos.users.ensure_profile(principal.user_id, principal.email)
     role_value = repos.users.get_role(principal.user_id)
     role = Role.ADMINISTRATOR if role_value == Role.ADMINISTRATOR.value else Role.USER
     return CurrentUser(principal=principal, profile=profile, role=role)

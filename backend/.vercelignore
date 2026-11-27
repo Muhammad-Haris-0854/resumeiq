@@ -1,0 +1,12 @@
+# Vercel picks pyproject.toml over requirements.txt when both exist, and our pyproject.toml only
+# holds lint/test configuration, so the build would install zero dependencies. Excluding it here
+# makes Vercel use requirements.txt, which stays the single source of truth (Docker uses it too).
+pyproject.toml
+
+# Not needed at runtime.
+tests/
+.env
+.env.*
+.venv/
+__pycache__/
+*.pyc

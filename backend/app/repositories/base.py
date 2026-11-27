@@ -17,6 +17,11 @@ class UserRepository(ABC):
     def get_profile(self, user_id: str) -> Row | None: ...
 
     @abstractmethod
+    def ensure_profile(self, user_id: str, email: str | None) -> Row:
+        """Return the profile row, creating it for an auth user that predates the trigger."""
+        ...
+
+    @abstractmethod
     def update_profile(self, user_id: str, patch: Row) -> Row: ...
 
     @abstractmethod

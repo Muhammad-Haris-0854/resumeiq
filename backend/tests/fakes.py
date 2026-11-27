@@ -41,6 +41,13 @@ class FakeUsers(UserRepository):
     def get_profile(self, user_id: str) -> dict[str, Any] | None:
         return self.profiles.get(user_id)
 
+    def ensure_profile(self, user_id: str, email: str | None) -> dict[str, Any]:
+        if user_id not in self.profiles:
+            self.profiles[user_id] = {
+                "id": user_id, "email": email or "", "plan": "free", "created_at": _now()
+            }
+        return self.profiles[user_id]
+
     def update_profile(self, user_id: str, patch: dict[str, Any]) -> dict[str, Any]:
         row = self.profiles.setdefault(
             user_id, {"id": user_id, "email": "", "plan": "free", "created_at": _now()}
