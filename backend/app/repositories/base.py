@@ -45,6 +45,10 @@ class ResumeRepository(ABC):
     @abstractmethod
     def update(self, user_id: str, resume_id: str, patch: Row) -> Row: ...
 
+    # Worker path: no user context available, keyed by resume id only.
+    @abstractmethod
+    def update_by_id(self, resume_id: str, patch: Row) -> Row: ...
+
     @abstractmethod
     def soft_delete(self, user_id: str, resume_id: str) -> None: ...
 

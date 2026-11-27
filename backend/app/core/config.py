@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -50,7 +50,11 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
 
     # --- HTTP ---------------------------------------------------------------
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    # NoDecode: allow a plain comma-separated value in .env. Without it pydantic-settings
+    # tries to JSON-decode the field first and the app refuses to start on "a,b".
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:5173"]
+    )
     rate_limit_per_minute: int = 120
     max_upload_bytes: int = 5 * 1024 * 1024
     signed_url_ttl_seconds: int = 60

@@ -96,6 +96,11 @@ class FakeResumes(ResumeRepository):
         row.update(patch)
         return row
 
+    def update_by_id(self, resume_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+        row = self.rows[resume_id]
+        row.update(patch)
+        return row
+
     def soft_delete(self, user_id: str, resume_id: str) -> None:
         self.rows[resume_id]["deleted_at"] = _now()
 

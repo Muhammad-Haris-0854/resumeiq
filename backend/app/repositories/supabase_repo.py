@@ -154,6 +154,18 @@ class SupabaseResumeRepository(_Base, ResumeRepository):
             raise NotFound("Resume not found")
         return row
 
+    def update_by_id(self, resume_id: str, patch: Row) -> Row:
+        """Worker path: the job knows the resume id, not the owning user."""
+        row = self._one(
+            self._table("resumes")
+            .update({**_plain(patch), "updated_at": _now()})
+            .eq("id", resume_id)
+            .execute()
+        )
+        if not row:
+            raise NotFound("Resume not found")
+        return row
+
     def soft_delete(self, user_id: str, resume_id: str) -> None:
         self._table("resumes").update({"deleted_at": _now()}).eq("id", resume_id).eq(
             "user_id", user_id

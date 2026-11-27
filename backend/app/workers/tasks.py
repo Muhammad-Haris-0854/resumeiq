@@ -44,10 +44,7 @@ def extract_resume(self: Task, resume_id: str, version_id: str) -> dict[str, str
     data = repos.storage.download("resumes", version["storage_path"])
     result = extract_document(data, version["mime_type"], ocr_enabled=settings.ocr_enabled)
     extracted = normalise(result.text, result.page_count)
-    repos.resumes.update(
-        resume_id,
-        {"status": "extracted"},
-    )
+    repos.resumes.update_by_id(resume_id, {"status": "extracted"})
     _update_version(version_id, {
         "raw_text": result.text,
         "extracted": extracted,
